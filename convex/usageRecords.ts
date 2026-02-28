@@ -40,6 +40,8 @@ export const getStats = query({
     let totalCacheReadTokens = 0;
     let totalCacheWriteTokens = 0;
     let totalApiCalls = 0;
+    let apiCost = 0;
+    let claudeCodeCost = 0;
 
     const modelMap = new Map<string, { cost: number; apiCalls: number }>();
     const projectMap = new Map<string, { cost: number; apiCalls: number }>();
@@ -51,6 +53,13 @@ export const getStats = query({
       totalCacheReadTokens += r.cacheReadTokens;
       totalCacheWriteTokens += r.cacheWriteTokens;
       totalApiCalls += r.apiCalls;
+
+      const source = r.source || "claude-code";
+      if (source === "api") {
+        apiCost += r.estimatedCost;
+      } else {
+        claudeCodeCost += r.estimatedCost;
+      }
 
       const modelEntry = modelMap.get(r.model) || { cost: 0, apiCalls: 0 };
       modelEntry.cost += r.estimatedCost;
@@ -71,6 +80,8 @@ export const getStats = query({
       totalCacheReadTokens,
       totalCacheWriteTokens,
       totalApiCalls,
+      apiCost,
+      claudeCodeCost,
       byModel: Array.from(modelMap.entries()).map(([model, data]) => ({
         model,
         ...data,
@@ -88,6 +99,7 @@ export const create = mutation({
     agentId: v.string(),
     sessionId: v.optional(v.string()),
     model: v.string(),
+    source: v.optional(v.union(v.literal("api"), v.literal("claude-code"))),
     projectSlug: v.optional(v.string()),
     inputTokens: v.number(),
     outputTokens: v.number(),

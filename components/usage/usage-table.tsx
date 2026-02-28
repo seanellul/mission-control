@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MODEL_LABELS, formatCost, formatTokens } from "@/lib/pricing";
+import { SourceBadge } from "./usage-stats";
 import type { UsageRecord } from "@/types";
 
 export function UsageTable({ records }: { records: UsageRecord[] }) {
@@ -19,6 +20,7 @@ export function UsageTable({ records }: { records: UsageRecord[] }) {
               <thead>
                 <tr className="border-b border-border text-left text-muted-foreground">
                   <th className="pb-2 pr-4 font-medium">Agent</th>
+                  <th className="pb-2 pr-4 font-medium">Source</th>
                   <th className="pb-2 pr-4 font-medium">Model</th>
                   <th className="pb-2 pr-4 font-medium text-right">In</th>
                   <th className="pb-2 pr-4 font-medium text-right">Out</th>
@@ -45,6 +47,9 @@ export function UsageTable({ records }: { records: UsageRecord[] }) {
                     >
                       <td className="py-2 pr-4 font-mono text-xs">
                         {r.agentId}
+                      </td>
+                      <td className="py-2 pr-4">
+                        <SourceBadge source={r.source || "claude-code"} />
                       </td>
                       <td className="py-2 pr-4">
                         <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium">

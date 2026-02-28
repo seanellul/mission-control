@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
   const {
-    agentId, sessionId, model, projectSlug,
+    agentId, sessionId, model, source, projectSlug,
     inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens,
     apiCalls, estimatedCost, startedAt, endedAt,
   } = body;
@@ -39,10 +39,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const validSource = source === "api" || source === "claude-code" ? source : "claude-code";
+
   const id = await convex.mutation(api.usageRecords.create, {
     agentId,
     sessionId,
     model,
+    source: validSource,
     projectSlug,
     inputTokens: inputTokens || 0,
     outputTokens: outputTokens || 0,

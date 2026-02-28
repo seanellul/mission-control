@@ -121,11 +121,14 @@ export interface ApiResponse<T> {
 }
 
 // Usage tracking types
+export type UsageSource = "api" | "claude-code";
+
 export interface UsageRecord {
   _id: string;
   agentId: string;
   sessionId?: string;
   model: string;
+  source?: UsageSource;
   projectSlug?: string;
   inputTokens: number;
   outputTokens: number;
@@ -145,6 +148,8 @@ export interface UsageStats {
   totalCacheReadTokens: number;
   totalCacheWriteTokens: number;
   totalApiCalls: number;
+  apiCost: number;
+  claudeCodeCost: number;
   byModel: { model: string; cost: number; apiCalls: number }[];
   byProject: { projectSlug: string; cost: number; apiCalls: number }[];
 }

@@ -100,6 +100,7 @@ export default defineSchema({
     agentId: v.string(),
     sessionId: v.optional(v.string()),
     model: v.string(),
+    source: v.optional(v.union(v.literal("api"), v.literal("claude-code"))),
     projectSlug: v.optional(v.string()),
     inputTokens: v.number(),
     outputTokens: v.number(),

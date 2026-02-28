@@ -77,9 +77,9 @@ export default function DashboardPage() {
               value={taskStats.pending}
             />
             <StatCard
-              icon={<DollarSign className="h-5 w-5 text-green-500" />}
-              label="Est. Total Cost"
-              value={usageStats ? formatCost(usageStats.totalCost) : "—"}
+              icon={<DollarSign className="h-5 w-5 text-red-500" />}
+              label="API Cost (billed)"
+              value={usageStats ? formatCost(usageStats.apiCost) : "—"}
             />
           </div>
         )}
