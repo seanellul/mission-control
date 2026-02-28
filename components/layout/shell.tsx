@@ -1,3 +1,5 @@
+"use client";
+
 import { Header } from "./header";
 
 interface ShellProps {
@@ -10,7 +12,7 @@ export function Shell({ children, title, description }: ShellProps) {
   return (
     <div className="flex h-full flex-col">
       <Header title={title} description={description} />
-      <main className="flex-1 overflow-auto p-6">{children}</main>
+      <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
     </div>
   );
 }

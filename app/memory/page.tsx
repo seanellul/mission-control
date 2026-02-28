@@ -64,9 +64,9 @@ export default function MemoryPage() {
 
   return (
     <Shell title="Memory" description="Browse and search agent memory files">
-      <div className="flex gap-6 h-[calc(100vh-180px)]">
+      <div className="flex flex-col gap-4 md:flex-row md:gap-6 md:h-[calc(100vh-180px)]">
         {/* File Tree Sidebar */}
-        <div className="w-64 flex-shrink-0 overflow-auto rounded-lg border border-border bg-card p-4">
+        <div className="max-h-48 overflow-auto rounded-lg border border-border bg-card p-4 md:max-h-none md:w-64 md:flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium text-sm">Files</h3>
             <Button variant="ghost" size="icon" onClick={fetchFiles} disabled={loading}>
@@ -91,7 +91,7 @@ export default function MemoryPage() {
         </div>
 
         {/* File Content */}
-        <div className="flex-1 overflow-auto">
+        <div className="min-h-[300px] flex-1 overflow-auto">
           {selectedFile === null ? (
             <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border">
               <p className="text-sm text-muted-foreground">
@@ -99,7 +99,7 @@ export default function MemoryPage() {
               </p>
             </div>
           ) : contentLoading ? (
-            <Skeleton className="h-full" />
+            <Skeleton className="h-64 md:h-full" />
           ) : fileContent !== null ? (
             <FileViewer filename={selectedFile} content={fileContent} />
           ) : null}

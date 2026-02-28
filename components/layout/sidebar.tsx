@@ -9,8 +9,10 @@ import {
   Clock,
   Brain,
   Folder,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "./sidebar-context";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -28,50 +30,48 @@ const projects = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isOpen, close } = useSidebar();
 
   return (
-    <div className="flex h-full w-56 flex-col border-r border-border bg-card">
-      <div className="flex h-14 items-center border-b border-border px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
-            <span className="text-sm font-bold text-accent-foreground">MC</span>
-          </div>
-          <span className="font-semibold text-foreground">Mission Control</span>
-        </Link>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          onClick={close}
+        />
+      )}
 
-      <nav className="flex-1 space-y-1 px-2 py-4">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="border-t border-border px-2 py-4">
-        <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Projects
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-border bg-card transition-transform duration-200 ease-in-out md:static md:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex h-14 items-center justify-between border-b border-border px-4">
+          <Link href="/" className="flex items-center gap-2" onClick={close}>
+            <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
+              <span className="text-sm font-bold text-accent-foreground">MC</span>
+            </div>
+            <span className="font-semibold text-foreground">Mission Control</span>
+          </Link>
+          <button
+            onClick={close}
+            className="rounded-md p-1 text-muted-foreground hover:text-foreground md:hidden"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <div className="mt-2 space-y-1">
-          {projects.map((project) => {
-            const isActive = pathname === `/projects/${project.slug}`;
+
+        <nav className="flex-1 space-y-1 px-2 py-4">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href;
             return (
               <Link
-                key={project.slug}
-                href={`/projects/${project.slug}`}
+                key={item.name}
+                href={item.href}
+                onClick={close}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   isActive
@@ -79,16 +79,43 @@ export function Sidebar() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: project.color }}
-                />
-                {project.name}
+                <item.icon className="h-4 w-4" />
+                {item.name}
               </Link>
             );
           })}
+        </nav>
+
+        <div className="border-t border-border px-2 py-4">
+          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Projects
+          </div>
+          <div className="mt-2 space-y-1">
+            {projects.map((project) => {
+              const isActive = pathname === `/projects/${project.slug}`;
+              return (
+                <Link
+                  key={project.slug}
+                  href={`/projects/${project.slug}`}
+                  onClick={close}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: project.color }}
+                  />
+                  {project.name}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
