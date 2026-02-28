@@ -52,6 +52,12 @@ export default defineSchema({
     .index("by_project", ["projectSlug"])
     .index("by_status", ["status"]),
 
+  memoryFiles: defineTable({
+    filename: v.string(),
+    content: v.string(),
+    updatedAt: v.number(),
+  }).index("by_filename", ["filename"]),
+
   activities: defineTable({
     projectSlug: v.optional(v.string()),
     type: v.union(

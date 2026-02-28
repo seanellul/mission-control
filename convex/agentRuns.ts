@@ -60,3 +60,36 @@ export const complete = mutation({
     });
   },
 });
+
+export const upsertByAgentId = mutation({
+  args: {
+    agentId: v.string(),
+    projectSlug: v.optional(v.string()),
+    status: v.union(v.literal("running"), v.literal("done"), v.literal("failed")),
+    summary: v.optional(v.string()),
+    startedAt: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("agentRuns")
+      .filter((q) => q.eq(q.field("agentId"), args.agentId))
+      .first();
+
+    const now = Date.now();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        status: args.status,
+        summary: args.summary,
+        endedAt: args.status !== "running" ? now : undefined,
+      });
+    } else {
+      await ctx.db.insert("agentRuns", {
+        agentId: args.agentId,
+        projectSlug: args.projectSlug,
+        status: args.status,
+        summary: args.summary,
+        startedAt: args.startedAt ?? now,
+      });
+    }
+  },
+});

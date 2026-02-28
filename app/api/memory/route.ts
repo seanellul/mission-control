@@ -1,76 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/convex/_generated/api";
 
-const MEMORY_DIR = path.join(
-  process.env.HOME || "/home/node",
-  ".openclaw/workspace/memory"
-);
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const SECRET = process.env.MC_AGENT_SECRET || "snowflake";
 
-interface MemoryFile {
-  name: string;
-  path: string;
-  isDirectory: boolean;
-  modifiedAt: number;
-}
-
+// GET — list files or get specific file content
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const filename = searchParams.get("file");
 
-  // If a specific file is requested, return its content
   if (filename) {
-    try {
-      const filePath = path.join(MEMORY_DIR, filename);
-
-      // Prevent directory traversal
-      if (!filePath.startsWith(MEMORY_DIR)) {
-        return NextResponse.json({ error: "Invalid path" }, { status: 400 });
-      }
-
-      const content = await fs.readFile(filePath, "utf-8");
-      return NextResponse.json({ content });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        return NextResponse.json({ error: "File not found" }, { status: 404 });
-      }
-      console.error("Error reading memory file:", error);
-      return NextResponse.json(
-        { error: "Failed to read file" },
-        { status: 500 }
-      );
+    const file = await convex.query(api.memoryFiles.get, { filename });
+    if (!file) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
+    return NextResponse.json({ content: file.content, updatedAt: file.updatedAt });
   }
 
-  // Otherwise, return the directory listing
-  try {
-    const entries = await fs.readdir(MEMORY_DIR, { withFileTypes: true });
+  const files = await convex.query(api.memoryFiles.list);
+  return NextResponse.json({
+    files: files.map((f) => ({
+      name: f.filename,
+      modifiedAt: f.updatedAt,
+      isDirectory: false,
+    })),
+  });
+}
 
-    const files: MemoryFile[] = await Promise.all(
-      entries.map(async (entry) => {
-        const filePath = path.join(MEMORY_DIR, entry.name);
-        const stats = await fs.stat(filePath);
-        return {
-          name: entry.name,
-          path: filePath,
-          isDirectory: entry.isDirectory(),
-          modifiedAt: stats.mtime.getTime(),
-        };
-      })
-    );
-
-    // Sort by modified time descending
-    files.sort((a, b) => b.modifiedAt - a.modifiedAt);
-
-    return NextResponse.json({ files });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return NextResponse.json({ files: [] });
-    }
-    console.error("Error reading memory directory:", error);
-    return NextResponse.json(
-      { error: "Failed to read memory directory" },
-      { status: 500 }
-    );
+// POST — Pi pushes memory file content to Convex
+export async function POST(request: NextRequest) {
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const { filename, content } = await request.json();
+  if (!filename || content === undefined) {
+    return NextResponse.json({ error: "filename and content required" }, { status: 400 });
+  }
+
+  await convex.mutation(api.memoryFiles.upsert, { filename, content });
+  return NextResponse.json({ ok: true });
 }
