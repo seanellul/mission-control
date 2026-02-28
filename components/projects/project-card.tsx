@@ -8,9 +8,12 @@ interface ProjectCardProps {
   project: Project;
   decisionCount?: number;
   taskCount?: number;
+  tasksDone?: number;
 }
 
-export function ProjectCard({ project, decisionCount = 0, taskCount = 0 }: ProjectCardProps) {
+export function ProjectCard({ project, decisionCount = 0, taskCount = 0, tasksDone = 0 }: ProjectCardProps) {
+  const progressPct = taskCount > 0 ? Math.round((tasksDone / taskCount) * 100) : 0;
+
   return (
     <Link href={`/projects/${project.slug}`}>
       <Card className="group cursor-pointer transition-colors hover:border-muted-foreground">
@@ -52,6 +55,22 @@ export function ProjectCard({ project, decisionCount = 0, taskCount = 0 }: Proje
           <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
             {project.description}
           </p>
+
+          {taskCount > 0 && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                <span>{tasksDone}/{taskCount} tasks done</span>
+                <span>{progressPct}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-muted">
+                <div
+                  className="h-1.5 rounded-full bg-green-500 transition-all"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             {decisionCount > 0 && (
               <div className="flex items-center gap-1">

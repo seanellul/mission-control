@@ -1,15 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Shell } from "@/components/layout/shell";
 import { DecisionList } from "@/components/decisions/decision-list";
 import { TaskList } from "@/components/tasks/task-list";
+import { TaskDetailDialog } from "@/components/tasks/task-detail-dialog";
+import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 import { ActivityFeed } from "@/components/activity/activity-feed";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Plus } from "lucide-react";
 import type { Project, Decision, Task, Activity } from "@/types";
 
 interface ProjectPageProps {
@@ -23,6 +27,10 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const decisions = useQuery(api.decisions.list, { projectSlug: slug }) as Decision[] | undefined;
   const tasks = useQuery(api.tasks.list, { projectSlug: slug }) as Task[] | undefined;
   const activities = useQuery(api.activities.list, { projectSlug: slug, limit: 20 }) as Activity[] | undefined;
+
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showTaskDetail, setShowTaskDetail] = useState(false);
+  const [showCreateTask, setShowCreateTask] = useState(false);
 
   if (project === undefined) {
     return (
@@ -39,7 +47,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     return (
       <Shell title="Project Not Found">
         <div className="flex h-64 items-center justify-center">
-          <p className="text-muted-foreground">Project "{slug}" not found</p>
+          <p className="text-muted-foreground">Project &quot;{slug}&quot; not found</p>
         </div>
       </Shell>
     );
@@ -49,13 +57,14 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     (d) => d.status === "needs-sean" || d.status === "needs-agent"
   ) || [];
 
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setShowTaskDetail(true);
+  };
+
   return (
-    <Shell
-      title={project.name}
-      description={project.description}
-    >
+    <Shell title={project.name} description={project.description}>
       <div className="space-y-6">
-        {/* Project Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div
@@ -87,17 +96,38 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           )}
         </div>
 
-        {/* Content Tabs */}
-        <Tabs defaultValue="decisions">
+        <Tabs defaultValue="tasks">
           <TabsList>
-            <TabsTrigger value="decisions">
-              Decisions {pendingDecisions.length > 0 && `(${pendingDecisions.length})`}
-            </TabsTrigger>
             <TabsTrigger value="tasks">
               Tasks {tasks && `(${tasks.length})`}
             </TabsTrigger>
+            <TabsTrigger value="decisions">
+              Decisions {pendingDecisions.length > 0 && `(${pendingDecisions.length})`}
+            </TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="tasks" className="mt-4">
+            <div className="mb-4">
+              <Button size="sm" onClick={() => setShowCreateTask(true)}>
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Task
+              </Button>
+            </div>
+            {tasks === undefined ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-16" />
+                ))}
+              </div>
+            ) : (
+              <TaskList
+                tasks={tasks}
+                showProject={false}
+                onTaskClick={handleTaskClick}
+              />
+            )}
+          </TabsContent>
 
           <TabsContent value="decisions" className="mt-4">
             {decisions === undefined ? (
@@ -108,18 +138,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
               </div>
             ) : (
               <DecisionList decisions={decisions} showProject={false} />
-            )}
-          </TabsContent>
-
-          <TabsContent value="tasks" className="mt-4">
-            {tasks === undefined ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-16" />
-                ))}
-              </div>
-            ) : (
-              <TaskList tasks={tasks} showProject={false} />
             )}
           </TabsContent>
 
@@ -138,6 +156,18 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           </TabsContent>
         </Tabs>
       </div>
+
+      <TaskDetailDialog
+        task={selectedTask}
+        open={showTaskDetail}
+        onOpenChange={setShowTaskDetail}
+      />
+
+      <CreateTaskDialog
+        open={showCreateTask}
+        onOpenChange={setShowCreateTask}
+        defaultProjectSlug={slug}
+      />
     </Shell>
   );
 }

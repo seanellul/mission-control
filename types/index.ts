@@ -12,17 +12,24 @@ export interface Project {
 }
 
 // Task types
-export type TaskStatus = "todo" | "in-progress" | "done";
-export type TaskPriority = "low" | "medium" | "high";
+export type TaskStatus = "backlog" | "todo" | "in-progress" | "done";
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
 
 export interface Task {
   _id: string;
   projectSlug: string;
   title: string;
+  description?: string;
   status: TaskStatus;
   assignee?: string;
   priority: TaskPriority;
+  labels?: string[];
+  parentTaskId?: string;
+  decisionId?: string;
+  agentRunId?: string;
+  completedAt?: number;
   createdAt: number;
+  updatedAt?: number;
 }
 
 // Decision types (KEY FEATURE)
@@ -45,14 +52,24 @@ export interface Decision {
 // Agent types
 export type AgentStatus = "running" | "done" | "failed";
 
+export interface Deliverable {
+  type: string;
+  title: string;
+  url?: string;
+}
+
 export interface AgentRun {
   _id: string;
   agentId: string;
   projectSlug?: string;
+  taskId?: string;
+  model?: string;
   status: AgentStatus;
   startedAt: number;
   endedAt?: number;
   summary?: string;
+  deliverables?: Deliverable[];
+  errorMessage?: string;
 }
 
 // Activity types

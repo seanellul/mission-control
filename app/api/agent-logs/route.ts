@@ -5,13 +5,11 @@ import { api } from "@/convex/_generated/api";
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const SECRET = process.env.MC_AGENT_SECRET || "snowflake";
 
-// GET — return agent runs from Convex
 export async function GET() {
   const agents = await convex.query(api.agentRuns.list, { limit: 20 });
   return NextResponse.json({ agents });
 }
 
-// POST — Pi pushes agent status updates to Convex
 export async function POST(request: NextRequest) {
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${SECRET}`) {
@@ -19,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { agentId, projectSlug, status, summary, startedAt } = body;
+  const { agentId, projectSlug, status, summary, startedAt, taskId, model, deliverables, errorMessage } = body;
 
   if (!agentId || !status) {
     return NextResponse.json({ error: "agentId and status required" }, { status: 400 });
@@ -31,6 +29,10 @@ export async function POST(request: NextRequest) {
     status,
     summary,
     startedAt,
+    taskId,
+    model,
+    deliverables,
+    errorMessage,
   });
 
   return NextResponse.json({ ok: true });

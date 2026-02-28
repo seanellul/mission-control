@@ -52,6 +52,7 @@ export function getStatusColor(status: string): string {
     resolved: "#22c55e",
     deferred: "#6b7280",
     // Task statuses
+    backlog: "#94a3b8",
     todo: "#6b7280",
     "in-progress": "#3b82f6",
     done: "#22c55e",

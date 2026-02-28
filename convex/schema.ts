@@ -14,13 +14,26 @@ export default defineSchema({
   tasks: defineTable({
     projectSlug: v.string(),
     title: v.string(),
-    status: v.union(v.literal("todo"), v.literal("in-progress"), v.literal("done")),
+    description: v.optional(v.string()),
+    status: v.union(
+      v.literal("backlog"),
+      v.literal("todo"),
+      v.literal("in-progress"),
+      v.literal("done")
+    ),
     assignee: v.optional(v.string()),
-    priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("urgent")),
+    labels: v.optional(v.array(v.string())),
+    parentTaskId: v.optional(v.id("tasks")),
+    decisionId: v.optional(v.id("decisions")),
+    agentRunId: v.optional(v.id("agentRuns")),
+    completedAt: v.optional(v.number()),
     createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_project", ["projectSlug"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_parent", ["parentTaskId"]),
 
   decisions: defineTable({
     projectSlug: v.string(),
@@ -45,10 +58,18 @@ export default defineSchema({
   agentRuns: defineTable({
     agentId: v.string(),
     projectSlug: v.optional(v.string()),
+    taskId: v.optional(v.id("tasks")),
+    model: v.optional(v.string()),
     status: v.union(v.literal("running"), v.literal("done"), v.literal("failed")),
     startedAt: v.number(),
     endedAt: v.optional(v.number()),
     summary: v.optional(v.string()),
+    deliverables: v.optional(v.array(v.object({
+      type: v.string(),
+      title: v.string(),
+      url: v.optional(v.string()),
+    }))),
+    errorMessage: v.optional(v.string()),
   })
     .index("by_project", ["projectSlug"])
     .index("by_status", ["status"]),

@@ -1,18 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import {
   LayoutDashboard,
   GitBranch,
   Bot,
   Clock,
   Brain,
-  Folder,
   X,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
+import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
+import type { Project } from "@/types";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -22,19 +27,16 @@ const navigation = [
   { name: "Memory", href: "/memory", icon: Brain },
 ];
 
-const projects = [
-  { name: "Ernest", slug: "ernest", color: "#3b82f6" },
-  { name: "Word Solitaire", slug: "word-solitaire", color: "#22c55e" },
-  { name: "OpenClaw Infra", slug: "openclaw-infra", color: "#a855f7" },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
   const { isOpen, close } = useSidebar();
+  const [showCreateProject, setShowCreateProject] = useState(false);
+
+  const projects = useQuery(api.projects.list) as Project[] | undefined;
+  const activeProjects = projects?.filter((p) => p.status !== "archived") || [];
 
   return (
     <>
-      {/* Mobile backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 md:hidden"
@@ -42,7 +44,6 @@ export function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-border bg-card transition-transform duration-200 ease-in-out md:static md:translate-x-0",
@@ -87,11 +88,20 @@ export function Sidebar() {
         </nav>
 
         <div className="border-t border-border px-2 py-4">
-          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Projects
+          <div className="flex items-center justify-between px-3 py-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Projects
+            </span>
+            <button
+              onClick={() => setShowCreateProject(true)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              title="New project"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
           </div>
           <div className="mt-2 space-y-1">
-            {projects.map((project) => {
+            {activeProjects.map((project) => {
               const isActive = pathname === `/projects/${project.slug}`;
               return (
                 <Link
@@ -116,6 +126,11 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      <CreateProjectDialog
+        open={showCreateProject}
+        onOpenChange={setShowCreateProject}
+      />
     </>
   );
 }
