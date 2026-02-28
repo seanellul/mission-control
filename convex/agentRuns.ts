@@ -4,13 +4,12 @@ import { v } from "convex/values";
 export const list = query({
   args: { projectSlug: v.optional(v.string()), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    let q = ctx.db.query("agentRuns");
-
-    if (args.projectSlug) {
-      q = q.withIndex("by_project", (qb) => qb.eq("projectSlug", args.projectSlug!));
-    }
-
-    const results = await q.collect();
+    const results = args.projectSlug
+      ? await ctx.db
+          .query("agentRuns")
+          .withIndex("by_project", (qb) => qb.eq("projectSlug", args.projectSlug!))
+          .collect()
+      : await ctx.db.query("agentRuns").collect();
 
     // Sort by startedAt descending
     results.sort((a, b) => b.startedAt - a.startedAt);
