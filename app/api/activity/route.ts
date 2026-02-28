@@ -3,63 +3,30 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-
-    const { projectSlug, type, actor, message } = body;
-
-    // Validate required fields
-    if (!type || !actor || !message) {
-      return NextResponse.json(
-        { error: "Missing required fields: type, actor, message" },
-        { status: 400 }
-      );
-    }
-
-    // Validate type
-    const validTypes = ["commit", "decision", "task", "agent", "note"];
-    if (!validTypes.includes(type)) {
-      return NextResponse.json(
-        { error: `Type must be one of: ${validTypes.join(", ")}` },
-        { status: 400 }
-      );
-    }
-
-    const id = await convex.mutation(api.activities.create, {
-      projectSlug,
-      type,
-      actor,
-      message,
-    });
-
-    return NextResponse.json({ id, success: true });
-  } catch (error) {
-    console.error("Error creating activity:", error);
-    return NextResponse.json(
-      { error: "Failed to create activity" },
-      { status: 500 }
-    );
-  }
-}
+const SECRET = process.env.MC_AGENT_SECRET || "snowflake";
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const projectSlug = searchParams.get("projectSlug") || undefined;
-    const limit = searchParams.get("limit");
+  const { searchParams } = new URL(request.url);
+  const limit = parseInt(searchParams.get("limit") || "20");
+  const projectSlug = searchParams.get("project") || undefined;
 
-    const activities = await convex.query(api.activities.list, {
-      projectSlug,
-      limit: limit ? parseInt(limit, 10) : undefined,
-    });
-    return NextResponse.json({ activities });
-  } catch (error) {
-    console.error("Error fetching activities:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch activities" },
-      { status: 500 }
-    );
+  const activities = await convex.query(api.activities.list, { projectSlug, limit });
+  return NextResponse.json({ activities });
+}
+
+export async function POST(request: NextRequest) {
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const body = await request.json();
+  const { projectSlug, type, actor, message } = body;
+
+  if (!type || !actor || !message) {
+    return NextResponse.json({ error: "type, actor, message required" }, { status: 400 });
+  }
+
+  await convex.mutation(api.activities.create, { projectSlug, type, actor, message });
+  return NextResponse.json({ ok: true });
 }

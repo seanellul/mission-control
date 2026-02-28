@@ -39,6 +39,7 @@ export interface Decision {
   createdAt: number;
   resolvedAt?: number;
   resolution?: string;
+  comment?: string;
 }
 
 // Agent types
