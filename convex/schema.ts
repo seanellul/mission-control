@@ -95,4 +95,23 @@ export default defineSchema({
   })
     .index("by_project", ["projectSlug"])
     .index("by_time", ["createdAt"]),
+
+  usageRecords: defineTable({
+    agentId: v.string(),
+    sessionId: v.optional(v.string()),
+    model: v.string(),
+    projectSlug: v.optional(v.string()),
+    inputTokens: v.number(),
+    outputTokens: v.number(),
+    cacheReadTokens: v.number(),
+    cacheWriteTokens: v.number(),
+    apiCalls: v.number(),
+    estimatedCost: v.number(),
+    startedAt: v.number(),
+    endedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_agent", ["agentId"])
+    .index("by_project", ["projectSlug"])
+    .index("by_time", ["createdAt"]),
 });

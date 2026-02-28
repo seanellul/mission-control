@@ -10,14 +10,16 @@ import { ActivityFeed } from "@/components/activity/activity-feed";
 import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Plus, ListChecks, Loader2, CheckCircle2, Clock } from "lucide-react";
-import type { Project, Decision, Activity, Task } from "@/types";
+import { AlertCircle, Plus, ListChecks, Loader2, CheckCircle2, Clock, DollarSign } from "lucide-react";
+import { formatCost } from "@/lib/pricing";
+import type { Project, Decision, Activity, Task, UsageStats } from "@/types";
 
 export default function DashboardPage() {
   const projects = useQuery(api.projects.list) as Project[] | undefined;
   const decisions = useQuery(api.decisions.getPending) as Decision[] | undefined;
   const activities = useQuery(api.activities.getRecent, { limit: 10 }) as Activity[] | undefined;
   const allTasks = useQuery(api.tasks.list, {}) as Task[] | undefined;
+  const usageStats = useQuery(api.usageRecords.getStats, {}) as UsageStats | undefined;
 
   const [showCreateTask, setShowCreateTask] = useState(false);
 
@@ -53,7 +55,7 @@ export default function DashboardPage() {
     <Shell title="Dashboard" description="Overview of all projects and pending decisions">
       <div className="space-y-8">
         {taskStats && (
-          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
             <StatCard
               icon={<ListChecks className="h-5 w-5 text-muted-foreground" />}
               label="Total Tasks"
@@ -73,6 +75,11 @@ export default function DashboardPage() {
               icon={<Clock className="h-5 w-5 text-amber-500" />}
               label="Pending Decisions"
               value={taskStats.pending}
+            />
+            <StatCard
+              icon={<DollarSign className="h-5 w-5 text-green-500" />}
+              label="Est. Total Cost"
+              value={usageStats ? formatCost(usageStats.totalCost) : "—"}
             />
           </div>
         )}
@@ -162,7 +169,7 @@ function StatCard({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: number;
+  value: number | string;
 }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">

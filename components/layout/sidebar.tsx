@@ -11,6 +11,7 @@ import {
   Bot,
   Clock,
   Brain,
+  BarChart3,
   X,
   Plus,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Agents", href: "/agents", icon: Bot },
   { name: "Cron", href: "/cron", icon: Clock },
   { name: "Memory", href: "/memory", icon: Brain },
+  { name: "Usage", href: "/usage", icon: BarChart3 },
 ];
 
 export function Sidebar() {

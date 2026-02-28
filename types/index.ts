@@ -119,3 +119,32 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
 }
+
+// Usage tracking types
+export interface UsageRecord {
+  _id: string;
+  agentId: string;
+  sessionId?: string;
+  model: string;
+  projectSlug?: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  apiCalls: number;
+  estimatedCost: number;
+  startedAt: number;
+  endedAt?: number;
+  createdAt: number;
+}
+
+export interface UsageStats {
+  totalCost: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCacheReadTokens: number;
+  totalCacheWriteTokens: number;
+  totalApiCalls: number;
+  byModel: { model: string; cost: number; apiCalls: number }[];
+  byProject: { projectSlug: string; cost: number; apiCalls: number }[];
+}
