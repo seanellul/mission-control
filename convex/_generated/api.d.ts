@@ -11,6 +11,7 @@
 import type * as activities from "../activities.js";
 import type * as agentRuns from "../agentRuns.js";
 import type * as decisions from "../decisions.js";
+import type * as memoryFiles from "../memoryFiles.js";
 import type * as projects from "../projects.js";
 import type * as seed from "../seed.js";
 import type * as tasks from "../tasks.js";
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   agentRuns: typeof agentRuns;
   decisions: typeof decisions;
+  memoryFiles: typeof memoryFiles;
   projects: typeof projects;
   seed: typeof seed;
   tasks: typeof tasks;
