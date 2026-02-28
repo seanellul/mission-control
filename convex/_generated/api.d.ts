@@ -15,6 +15,7 @@ import type * as memoryFiles from "../memoryFiles.js";
 import type * as projects from "../projects.js";
 import type * as seed from "../seed.js";
 import type * as tasks from "../tasks.js";
+import type * as usageRecords from "../usageRecords.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   projects: typeof projects;
   seed: typeof seed;
   tasks: typeof tasks;
+  usageRecords: typeof usageRecords;
 }>;
 
 /**
