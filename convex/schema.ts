@@ -37,6 +37,7 @@ export default defineSchema({
     createdAt: v.number(),
     resolvedAt: v.optional(v.number()),
     resolution: v.optional(v.string()),
+    comment: v.optional(v.string()),
   })
     .index("by_project", ["projectSlug"])
     .index("by_status", ["status"]),

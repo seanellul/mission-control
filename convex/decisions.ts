@@ -75,20 +75,38 @@ export const resolve = mutation({
   args: {
     id: v.id("decisions"),
     resolution: v.string(),
+    comment: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.patch(args.id, {
       status: "resolved",
       resolution: args.resolution,
+      comment: args.comment,
       resolvedAt: Date.now(),
     });
   },
 });
 
 export const defer = mutation({
-  args: { id: v.id("decisions") },
+  args: {
+    id: v.id("decisions"),
+    comment: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
-    return await ctx.db.patch(args.id, { status: "deferred" });
+    return await ctx.db.patch(args.id, {
+      status: "deferred",
+      comment: args.comment,
+    });
+  },
+});
+
+export const addComment = mutation({
+  args: {
+    id: v.id("decisions"),
+    comment: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.patch(args.id, { comment: args.comment });
   },
 });
 
