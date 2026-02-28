@@ -4,6 +4,7 @@ export const TOKEN_PRICING: Record<string, { input: number; output: number; cach
   "claude-haiku-4-5-20251001": { input: 0.80, output: 4.00, cacheRead: 0.08, cacheWrite: 1.00 },
   "claude-sonnet-4-6":         { input: 3.00, output: 15.00, cacheRead: 0.30, cacheWrite: 3.75 },
   "claude-opus-4-6":           { input: 15.00, output: 75.00, cacheRead: 1.50, cacheWrite: 18.75 },
+  "claude-opus-4-5-20251101":  { input: 15.00, output: 75.00, cacheRead: 1.50, cacheWrite: 18.75 },
 };
 
 // Friendly model labels for UI
@@ -11,6 +12,7 @@ export const MODEL_LABELS: Record<string, string> = {
   "claude-haiku-4-5-20251001": "Haiku",
   "claude-sonnet-4-6": "Sonnet",
   "claude-opus-4-6": "Opus",
+  "claude-opus-4-5-20251101": "Opus 4.5",
 };
 
 /** Calculate cost in USD for a set of token counts */
